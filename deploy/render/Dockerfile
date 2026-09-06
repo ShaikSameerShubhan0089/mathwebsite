@@ -87,6 +87,14 @@ RUN curl -fsSL "https://wordpress.org/wordpress-${WP_VERSION}.tar.gz" -o /tmp/wp
           /var/www/html/license.txt \
           /var/www/html/xmlrpc.php
 
+# ------------------------------------------------------------ wp importer
+# The WordPress Importer is what reads mata-content.xml. It ships as a separate
+# plugin, and DISALLOW_FILE_MODS deliberately blocks installing plugins through
+# wp-admin — so it is baked in here instead. That is the right place for it
+# regardless: the container filesystem is rebuilt on every deploy, so anything
+# installed through the browser disappears at the next push.
+RUN curl -fsSL https://downloads.wordpress.org/plugin/wordpress-importer.zip -o /tmp/imp.zip  && unzip -q /tmp/imp.zip -d /var/www/html/wp-content/plugins/  && rm -f /tmp/imp.zip
+
 # ---------------------------------------------------- postgres translation
 # PG4WP is what lets WordPress speak to Postgres at all. It must be present
 # BEFORE the WordPress installer runs, or the installer creates MySQL syntax

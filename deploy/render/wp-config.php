@@ -115,7 +115,10 @@ define( 'DISALLOW_FILE_EDIT', true );
  * installing a plugin, seeing it work, and finding it gone a week later.
  * Plugins belong in the image.
  */
-define( 'DISALLOW_FILE_MODS', true );
+// Overridable so the restriction can be lifted temporarily from the dashboard
+// without a code change. Anything installed while it is off still disappears on
+// the next deploy, so treat it as a diagnostic escape hatch, not a workflow.
+define( 'DISALLOW_FILE_MODS', getenv( 'ALLOW_FILE_MODS' ) ? false : true );
 
 define( 'WP_DEBUG',         (bool) getenv( 'WP_DEBUG' ) );
 define( 'WP_DEBUG_DISPLAY', false );
