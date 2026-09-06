@@ -1,0 +1,33 @@
+# Line endings.
+#
+# This repository is edited on Windows, where core.autocrlf is commonly true,
+# and built inside Linux containers. A shell script that arrives with CRLF
+# endings fails as "bad interpreter: /bin/sh^M" — a message that names the
+# interpreter rather than the real problem, and costs an hour the first time
+# anyone meets it. These rules make the ending a property of the file rather
+# than of whoever last checked it out.
+
+# Default: normalise to LF in the repository, let git decide on checkout.
+* text=auto
+
+# Anything executed inside a container must be LF, always, on every platform.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+.dockerignore   text eol=lf
+entrypoint.sh   text eol=lf
+
+# Server-side code and configuration read by Linux tooling.
+*.php           text eol=lf
+*.yaml          text eol=lf
+*.yml           text eol=lf
+.htaccess       text eol=lf
+
+# Windows-side scripts keep CRLF; PowerShell 5.1 is happier with it.
+*.ps1           text eol=crlf
+
+# Binary — never touched.
+*.png           binary
+*.jpg           binary
+*.pdf           binary
+*.docx          binary
+*.gz            binary
