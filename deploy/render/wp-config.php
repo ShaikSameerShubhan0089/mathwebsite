@@ -77,7 +77,10 @@ if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X
  * "the home page works and nothing else does".
  */
 if ( defined( 'WP_HOME' ) ) {
-	$mata_parts = wp_parse_url( WP_HOME );
+	// parse_url, not wp_parse_url: wp-config.php is read before WordPress loads
+	// any of its own functions, so the wrapper does not exist yet and calling it
+	// is a fatal error on every request.
+	$mata_parts = parse_url( WP_HOME );
 	if ( ! empty( $mata_parts['host'] ) ) {
 		$_SERVER['HTTP_HOST']   = $mata_parts['host'];
 		$_SERVER['SERVER_NAME'] = $mata_parts['host'];
