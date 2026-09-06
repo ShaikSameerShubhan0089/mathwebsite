@@ -1,0 +1,49 @@
+# The build context is the repository root, so everything the image does not
+# need is excluded here. Without this the whole project is uploaded to the
+# builder on every deploy — slower, and it puts files in reach of a COPY that
+# should never be in the image.
+
+# Local development harness. local/www/wp-config.php holds a database password.
+local/
+
+# Tender source documents and generated deliverables.
+SRS/
+deploy/DEPLOY.md
+deploy/wp-config-production-snippet.php
+deploy/.htaccess
+deploy/wp-content/
+*.docx
+*.md
+
+# The second copy of the plugin and theme. The image builds from
+# deploy/render/wp-content/, and shipping wordpress/ as well would only create
+# doubt about which copy is live.
+wordpress/
+
+# The abandoned Node prototype, kept in the repo for history only.
+server/
+
+# Build tooling and working files.
+build-*.js
+rend/
+figs/
+node_modules/
+*.png
+*.pdf
+
+# Published HTML deliverables.
+*.html
+
+# Credentials — belt and braces. These are gitignored too, so they should never
+# reach a clone, but a local build runs against the working directory.
+render.env
+RENDER-ENV.txt
+*.env
+.env
+
+# Version control and OS noise.
+.git/
+.gitignore
+Thumbs.db
+.DS_Store
+desktop.ini

@@ -9,7 +9,10 @@ services:
     name: ais-mhatamaitice
     runtime: docker
     dockerfilePath: ./deploy/render/Dockerfile
-    dockerContext: ./deploy/render
+    # Repository root, which is also Render's default when the field is left
+    # blank — so the build works whether or not anyone fills it in. The
+    # Dockerfile's COPY paths are written relative to this.
+    dockerContext: .
     region: frankfurt          # EU data residency — the tender commits to this
     plan: starter              # see the note below before choosing free
 

@@ -33,3 +33,8 @@ wp-config.php
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# Deployment credentials — never commit.
+RENDER-ENV.txt
+*.env.txt
+*.env

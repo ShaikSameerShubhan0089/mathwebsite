@@ -4,8 +4,13 @@
 # WordPress + Apache + the PostgreSQL driver + the cogg-mata plugin and theme,
 # built to talk to a Supabase Postgres database through the PG4WP drop-in.
 #
-# Build locally to check it before pushing:
-#   docker build -t mata .
+# COPY paths are relative to the REPOSITORY ROOT, not to this folder. Render's
+# "Docker Build Context Directory" defaults to the repo root, and a blank field
+# is the easiest thing in the world to leave blank — a build that only works
+# when someone remembers to set it is a build that fails.
+#
+# Build locally to check it before pushing, FROM THE REPOSITORY ROOT:
+#   docker build -f deploy/render/Dockerfile -t mata .
 #   docker run --rm -p 8080:8080 -e PORT=8080 \
 #     -e DB_HOST=... -e DB_NAME=postgres -e DB_USER=... -e DB_PASSWORD=... mata
 
@@ -86,22 +91,22 @@ RUN curl -fsSL "https://wordpress.org/wordpress-${WP_VERSION}.tar.gz" -o /tmp/wp
 # PG4WP is what lets WordPress speak to Postgres at all. It must be present
 # BEFORE the WordPress installer runs, or the installer creates MySQL syntax
 # against a database that will reject it.
-COPY pg4wp/ /var/www/html/wp-content/pg4wp/
-COPY pg4wp/db.php /var/www/html/wp-content/db.php
+COPY deploy/render/pg4wp/ /var/www/html/wp-content/pg4wp/
+COPY deploy/render/pg4wp/db.php /var/www/html/wp-content/db.php
 
 # ------------------------------------------------------- the site's own code
-COPY wp-content/plugins/cogg-mata/ /var/www/html/wp-content/plugins/cogg-mata/
-COPY wp-content/themes/mata/       /var/www/html/wp-content/themes/mata/
-COPY wp-config.php                 /var/www/html/wp-config.php
-COPY .htaccess                     /var/www/html/.htaccess
-COPY mata-content.xml              /var/www/html/wp-content/mata-content.xml
+COPY deploy/render/wp-content/plugins/cogg-mata/ /var/www/html/wp-content/plugins/cogg-mata/
+COPY deploy/render/wp-content/themes/mata/   /var/www/html/wp-content/themes/mata/
+COPY deploy/render/wp-config.php             /var/www/html/wp-config.php
+COPY deploy/render/.htaccess                 /var/www/html/.htaccess
+COPY deploy/render/mata-content.xml          /var/www/html/wp-content/mata-content.xml
 
 RUN mkdir -p /var/www/html/wp-content/uploads \
  && chown -R www-data:www-data /var/www/html \
  && find /var/www/html -type d -exec chmod 755 {} \; \
  && find /var/www/html -type f -exec chmod 644 {} \;
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY deploy/render/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 10000
