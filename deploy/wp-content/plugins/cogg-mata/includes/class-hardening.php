@@ -41,7 +41,18 @@ final class COGG_Mata_Hardening {
 	 */
 	public function __construct() {
 		add_filter( 'rest_endpoints', array( $this, 'restrict_user_endpoints' ) );
-		add_action( 'template_redirect', array( $this, 'block_author_enumeration' ) );
+		/*
+		 * Priority 0, not the default 10.
+		 *
+		 * Core's redirect_canonical() is also on template_redirect at 10 and is
+		 * registered before any plugin loads, so at equal priority it runs first
+		 * and answers /?author=1 with a 301 to /author/<slug>/. The destination
+		 * 404s, but the Location header has already published the login name —
+		 * which is the whole thing this method exists to stop. Running first is
+		 * the difference between blocking enumeration and merely blocking the
+		 * page it leads to.
+		 */
+		add_action( 'template_redirect', array( $this, 'block_author_enumeration' ), 0 );
 
 		add_filter( 'xmlrpc_enabled', '__return_false' );
 		add_filter( 'wp_headers', array( $this, 'drop_pingback_header' ) );
