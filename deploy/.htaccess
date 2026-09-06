@@ -1,0 +1,81 @@
+# Áis Mhatamaitice — Apache configuration
+#
+# The local development harness serves the site through PHP's built-in server
+# with local/router.php doing the work mod_rewrite does here. That file is NOT
+# used in production and should not be uploaded. This is its replacement.
+#
+# Upload to the WordPress root (alongside wp-config.php).
+
+# ---------------------------------------------------------------- permalinks
+# WordPress pretty permalinks. Serve the file if it exists on disk, otherwise
+# hand the request to index.php and let WP_Rewrite resolve it.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# ------------------------------------------------------------ force https
+# The site is served over TLS. Without this a plain http request is answered
+# rather than upgraded, and WordPress emits mixed-content warnings.
+# Comment out only if the host terminates TLS and already redirects for you.
+<IfModule mod_rewrite.c>
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ------------------------------------------------------------ file guards
+# Refuse the files a WordPress install should never serve directly. The plugin
+# emits security headers itself, but a web server rule is the layer that still
+# applies if PHP is not reached at all.
+<FilesMatch "^(wp-config\.php|wp-config-sample\.php|readme\.html|license\.txt|\.htaccess|\.env|.*\.(log|sql|ini|bak|old))$">
+  Require all denied
+</FilesMatch>
+
+# Block direct execution of PHP inside the uploads directory. An uploaded file
+# that slips past the media validator is inert if it cannot be run.
+<IfModule mod_rewrite.c>
+RewriteRule ^wp-content/uploads/.*\.php$ - [F,L]
+</IfModule>
+
+# XML-RPC is disabled in the plugin; refuse it at the server too so the request
+# never reaches PHP.
+<Files xmlrpc.php>
+  Require all denied
+</Files>
+
+# ---------------------------------------------------------- security headers
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), interest-cohort=()"
+  # Enable once the site has run on TLS long enough to be sure. Starts at one
+  # day; raise to a year when confident.
+  # Header always set Strict-Transport-Security "max-age=86400"
+</IfModule>
+
+# --------------------------------------------------------------- compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ------------------------------------------------------------------- caching
+# The toolkit and stylesheet are versioned by the plugin, so a long cache is
+# safe: a new release changes the query string and busts it. HTML is never
+# cached, because a published resource must appear immediately.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 month"
+  ExpiresByType image/png               "access plus 1 month"
+  ExpiresByType application/pdf         "access plus 1 week"
+  ExpiresByType text/html               "access plus 0 seconds"
+</IfModule>

@@ -1,0 +1,96 @@
+/*
+Theme Name: Mata
+Theme URI: https://cogg.ie/
+Author: Vendor (COGG RFT — Primary Mathematics Hub)
+Description: Accessible Irish-language theme for the COGG Primary Mathematics Hub. Pairs with the cogg-mata plugin. WCAG 2.2 AA target; four breakpoints including whiteboard sizes (SRS 6.2, 6.3).
+Version: 1.0.0
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 8.1
+License: GPL-2.0-or-later
+Text Domain: mata
+*/
+
+/* Component styling lives in the plugin (assets/mata.css) so the interface
+   survives a theme change - SRS 21.3, "no component restricts COGG's ability
+   to modify the site". The theme owns layout and chrome only. */
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+	margin:0;background:var(--mata-ground);color:var(--mata-ink);
+	font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+	font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.mata-wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 20px}
+a{color:var(--mata-brand);text-underline-offset:2px}
+h1,h2,h3{line-height:1.15;text-wrap:balance;margin:0 0 12px}
+h1{font-size:clamp(1.9rem,4.4vw,2.7rem)}
+
+/* --mata-ground, not #fff: the brand token is a dark teal in the light theme
+   but a light cyan in the dark one, so a hardcoded white sat at 2.08:1 there.
+   Ground inverts with the theme and clears 7:1 both ways. WCAG 1.4.3. */
+.skip-link{position:absolute;left:8px;top:-60px;z-index:200;background:var(--mata-brand);color:var(--mata-ground);padding:10px 16px;border-radius:0 0 8px 8px;font-weight:600;transition:top .15s}
+.skip-link:focus{top:0}
+
+.site-header{background:var(--mata-surface);border-bottom:1px solid var(--mata-line);position:sticky;top:0;z-index:60}
+.site-header .bar{display:flex;align-items:center;gap:14px;padding:10px 0;flex-wrap:wrap}
+.site-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:800;font-size:1.15rem}
+.site-brand .glyph{width:34px;height:34px;border-radius:9px;background:var(--mata-brand);color:var(--mata-surface);display:grid;place-items:center;font-weight:800;flex:none}
+.site-brand small{display:block;font-weight:500;font-size:.7rem;color:var(--mata-ink-3)}
+.site-nav{margin-left:auto}
+.site-nav ul{list-style:none;display:flex;gap:2px;margin:0;padding:0;flex-wrap:wrap}
+.site-nav a{padding:10px 14px;border-radius:99px;text-decoration:none;color:var(--mata-ink-2);font-weight:600;font-size:.93rem;min-height:44px;display:flex;align-items:center}
+.site-nav a:hover{background:var(--mata-surface-2);color:var(--mata-ink)}
+.site-nav .current-menu-item > a{background:var(--mata-brand-soft);color:var(--mata-brand)}
+
+main{padding:28px 0 72px;min-height:60vh}
+.site-footer{border-top:1px solid var(--mata-line);background:var(--mata-surface);padding:24px 0;font-size:.85rem;color:var(--mata-ink-3)}
+.site-footer .bar{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.site-footer a{color:var(--mata-ink-2)}
+
+.hero{background:linear-gradient(160deg,var(--mata-brand-soft),var(--mata-surface) 70%);border:1px solid var(--mata-line);border-radius:18px;padding:clamp(26px,5vw,46px)}
+.hero p{max-width:60ch;color:var(--mata-ink-2);font-size:1.05rem}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:24px}
+.tile{background:var(--mata-surface);border:1px solid var(--mata-line);border-radius:12px;padding:20px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:6px}
+.tile:hover{border-color:var(--mata-line-2)}
+.tile strong{font-size:1.1rem}
+.tile span{font-size:.88rem;color:var(--mata-ink-3)}
+
+.entry-meta{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.pager{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap}
+.pager a,.pager span{padding:8px 14px;border-radius:8px;border:1px solid var(--mata-line);text-decoration:none;color:var(--mata-ink-2);min-height:44px;display:inline-flex;align-items:center}
+.pager .current{background:var(--mata-brand);border-color:var(--mata-brand);color:var(--mata-surface)}
+
+:focus-visible{outline:3px solid var(--mata-brand);outline-offset:2px;border-radius:4px}
+@media (max-width:620px){.mata-wrap{padding:0 14px}.site-nav{width:100%;margin-left:0;overflow-x:auto}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---- language switcher (SRS 6.1) ---------------------------------------- */
+/* A link, not a script: works with JS disabled and is announced correctly. */
+.lang-switch{
+	display:inline-flex;align-items:center;gap:7px;
+	margin-left:12px;padding:8px 14px;min-height:44px;
+	border:1px solid var(--mata-line-2);border-radius:99px;
+	text-decoration:none;color:var(--mata-ink-2);
+	font-weight:600;font-size:.85rem;white-space:nowrap;
+	transition:background .15s,border-color .15s,color .15s;
+}
+.lang-switch:hover{background:var(--mata-brand-soft);border-color:var(--mata-brand);color:var(--mata-brand)}
+.lang-switch__code{
+	font-size:.7rem;letter-spacing:.08em;font-weight:700;
+	background:var(--mata-surface-2);color:var(--mata-ink-3);
+	border-radius:4px;padding:2px 6px;
+}
+.lang-switch:hover .lang-switch__code{background:var(--mata-brand);color:var(--mata-surface)}
+@media (max-width:620px){
+	.lang-switch{margin-left:auto}
+	.lang-switch__name{display:none}
+}
+
+/* Shown only in English: says plainly what is and is not translated. */
+.lang-note{
+	max-width:1180px;margin:0 auto;padding:10px 20px;
+	font-size:.82rem;color:var(--mata-ink-3);
+	border-bottom:1px solid var(--mata-line);background:var(--mata-surface-2);
+}
+.lang-note strong{color:var(--mata-ink-2)}

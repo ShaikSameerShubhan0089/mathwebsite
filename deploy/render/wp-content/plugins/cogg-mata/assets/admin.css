@@ -1,0 +1,11 @@
+/*!
+ * COGG Mata — wp-admin styles.
+ * Only the metadata-gate pills and audit table are restyled; everything else is
+ * left as stock WordPress so COGG staff learn one interface, not two (SRS §6.5.5).
+ */
+.mata-pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;line-height:1.7}
+.mata-pill--ok{background:#dcf0e5;color:#1e6d4c;border:1px solid #7dbb9d}
+.mata-pill--warn{background:#f8ecd3;color:#8a6410;border:1px solid #d8b96b}
+.column-mata_meta_status{width:130px}
+#cogg_mata_activity .description{display:block;margin-top:4px}
+#cogg_mata_activity textarea.code{font-family:Consolas,Monaco,monospace;font-size:12px}

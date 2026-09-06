@@ -1,0 +1,86 @@
+# Render blueprint for Áis Mhatamaitice.
+#
+# Commit this at the repository root (or point Render at deploy/render/) and use
+# "New → Blueprint". Everything except the secrets is declared here; the four
+# marked sync:false are typed into the dashboard once and never committed.
+
+services:
+  - type: web
+    name: ais-mhatamaitice
+    runtime: docker
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: ./deploy/render
+    region: frankfurt          # EU data residency — the tender commits to this
+    plan: starter              # see the note below before choosing free
+
+    # Health check — deliberately commented out for the FIRST deploy.
+    #
+    # /wp-json/cogg-mata/v1/health only exists once the plugin is active, and
+    # the plugin can only be activated after WordPress is installed, which can
+    # only happen after the service is running. Setting it now means the first
+    # deploy fails its health check and rolls back before you ever reach the
+    # installer. Uncomment it after step 5 of RENDER-SUPABASE.md and redeploy;
+    # until then Render just checks that the port is listening.
+    #
+    # healthCheckPath: /wp-json/cogg-mata/v1/health
+
+    envVars:
+      # ---- Supabase connection -------------------------------------------
+      # Take these from Supabase → Project Settings → Database → Connection
+      # string → "Session pooler". Not the direct connection: on the free tier
+      # that host is IPv6-only and Render dials IPv4, so it times out.
+      - key: DB_HOST           # aws-0-<region>.pooler.supabase.com:5432
+        sync: false
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER           # postgres.<project-ref>
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: PGSSLMODE
+        value: require
+
+      # ---- WordPress salts ------------------------------------------------
+      # Generate once at https://api.wordpress.org/secret-key/1.1/salt/
+      - key: AUTH_KEY
+        generateValue: true
+      - key: SECURE_AUTH_KEY
+        generateValue: true
+      - key: LOGGED_IN_KEY
+        generateValue: true
+      - key: NONCE_KEY
+        generateValue: true
+      - key: AUTH_SALT
+        generateValue: true
+      - key: SECURE_AUTH_SALT
+        generateValue: true
+      - key: LOGGED_IN_SALT
+        generateValue: true
+      - key: NONCE_SALT
+        generateValue: true
+
+      # ---- site ------------------------------------------------------------
+      # Leave SITE_URL unset to use the .onrender.com address. Set it to the
+      # custom domain once one is attached, or every generated link keeps
+      # pointing at onrender.com.
+      # - key: SITE_URL
+      #   value: https://aismhatamaitice.ie
+      - key: WP_DEBUG
+        value: ""
+
+    # Media uploads are the one thing WordPress writes at run time. Without a
+    # disk they live only until the next deploy or restart. A disk is available
+    # on paid plans; on free, treat uploads as disposable and load PDFs through
+    # the import instead.
+    disk:
+      name: uploads
+      mountPath: /var/www/html/wp-content/uploads
+      sizeGB: 1
+
+# Notes on plan choice
+# --------------------
+# free    — spins down after ~15 minutes idle; the next visitor waits ~50s for a
+#           cold start, and no persistent disk is available. Fine for your own
+#           testing, poor for a link sent to COGG evaluators.
+# starter — always on, persistent disk, custom domain. This is the one to use
+#           for anything an evaluator will click.

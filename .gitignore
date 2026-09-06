@@ -1,0 +1,35 @@
+# Local development harness — 87 MB, and local/www/wp-config.php contains the
+# development database password. Never commit this.
+local/
+
+# Tender source documents supplied by COGG.
+SRS/
+
+# Build artefacts and working files.
+rend/
+figs/
+node_modules/
+*.docx
+_verify.pdf
+pdf*.png
+
+# The published HTML deliverables are generated; keep the sources instead.
+# Remove these lines if you want the artifacts in version control too.
+dossier.html
+evidence.html
+methodology.html
+traceability.html
+roadmap.html
+app.html
+
+# Never commit real credentials or a live configuration.
+wp-config.php
+!deploy/render/wp-config.php
+.env
+*.log
+*.sql
+
+# OS noise
+Thumbs.db
+.DS_Store
+desktop.ini

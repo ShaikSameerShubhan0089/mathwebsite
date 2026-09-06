@@ -1,0 +1,91 @@
+# COGG Primary Mathematics Hub — local stack
+#
+#   docker compose up -d && docker compose run --rm setup
+#   http://localhost:8091          public site
+#   http://localhost:8091/wp-admin admin (aoife@cogg.ie / cogg2026)
+#
+# Note the charset settings on every layer. RFT §13 requires fadas to display,
+# store, sort AND search correctly, and the classic way that fails is a MySQL
+# server defaulting to latin1 or a connection negotiating utf8 (3-byte) instead
+# of utf8mb4. Pinning it here, in the client, in the server and in wp-config
+# means an Irish title survives a round trip through every layer.
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mata-db
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      # Irish sorts accented vowels under their base letter, which is exactly
+      # what utf8mb4_unicode_ci already does. No custom collation is needed —
+      # see includes/class-search.php for why.
+    environment:
+      MYSQL_DATABASE: mata
+      MYSQL_USER: mata
+      MYSQL_PASSWORD: mata_dev_password
+      MYSQL_ROOT_PASSWORD: root_dev_password
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_dev_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: wordpress:6.7-php8.2-apache
+    container_name: mata-wp
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8091:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: mata
+      WORDPRESS_DB_USER: mata
+      WORDPRESS_DB_PASSWORD: mata_dev_password
+      WORDPRESS_DB_CHARSET: utf8mb4
+      WORDPRESS_DB_COLLATE: utf8mb4_unicode_ci
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_DEBUG_LOG', true );
+        define( 'WP_DEBUG_DISPLAY', false );
+        define( 'DISALLOW_FILE_EDIT', true );      /* SRS §11.6 hardening */
+        define( 'WP_AUTO_UPDATE_CORE', 'minor' );  /* SRS §11.3 patch cadence */
+        define( 'WPLANG', 'ga' );
+    volumes:
+      - wp_core:/var/www/html
+      - ./wp-content/plugins/cogg-mata:/var/www/html/wp-content/plugins/cogg-mata
+      - ./wp-content/themes/mata:/var/www/html/wp-content/themes/mata
+      - ./uploads:/var/www/html/wp-content/uploads
+
+  # One-shot provisioner: installs WordPress, activates the plugin and theme,
+  # creates the three COGG roles' demo accounts and seeds sample content.
+  setup:
+    image: wordpress:cli-php8.2
+    container_name: mata-setup
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: mata
+      WORDPRESS_DB_USER: mata
+      WORDPRESS_DB_PASSWORD: mata_dev_password
+    volumes:
+      - wp_core:/var/www/html
+      - ./wp-content/plugins/cogg-mata:/var/www/html/wp-content/plugins/cogg-mata
+      - ./wp-content/themes/mata:/var/www/html/wp-content/themes/mata
+      - ./uploads:/var/www/html/wp-content/uploads
+      - ./bin:/scripts
+    user: "33:33"
+    entrypoint: ["/bin/sh", "/scripts/setup.sh"]
+
+volumes:
+  db_data:
+  wp_core:
